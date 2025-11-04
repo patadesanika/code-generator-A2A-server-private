@@ -1,0 +1,41 @@
+name: Dependabot Dependency Test
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types: [opened, synchronize, reopened] 
+
+permissions:
+  contents: write      
+  pull-requests: write 
+jobs:
+  test-deps:
+    name: Run Dependabot workflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'&& startsWith(github.head_ref, 'dependabot/pip/')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create virtual environment
+        run: |
+          pip install uv
+          uv venv .venv
+          source .venv/bin/activate
+          uv pip install .
+
+      - name: Run tests
+        run: |
+          source .venv/bin/activate
+          uv pip install pytest pytest-asyncio
+          pytest -v
+      

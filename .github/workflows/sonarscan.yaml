@@ -1,0 +1,65 @@
+name: Pull Request Validation (SonarScan)
+
+on:
+  pull_request:
+    branches:
+      - dev     
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - dev
+permissions:
+  contents: read
+  security-events: write  
+  pull-requests: read
+  actions: read
+
+jobs:
+  Sonarqube:
+    name: Run Sonarqube Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+      # - name: Install dependencies
+      #   run: |
+      #     pip install uv
+      #     uv venv .venv
+      #     source .venv/bin/activate
+      #     uv pip install .   
+      # - name: Run tests and generate coverage
+      #   run: |
+      #     source .venv/bin/activate
+      #     uv pip install coverage pytest pytest-asyncio
+      #     coverage run -m pytest tests/
+      #     coverage xml -o coverage.xml
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          args: >
+            "-Dsonar.projectKey=yash-unified-code-generator-a2a-sever"
+            "-Dsonar.sources=."
+            "-Dsonar.inclusions=**/*.py"
+            "-Dsonar.source.exclusions=tests/**,**/k8s/**,**/helm/**,**/migrations/**"
+            "-Dsonar.exclusions=**/*.md,**/Dockerfile,**/*.ini,**/*.txt"
+            ${{ github.event_name == 'pull_request' && format('"-Dsonar.pullrequest.key={0}" "-Dsonar.pullrequest.branch={1}" "-Dsonar.pullrequest.base={2}"', github.event.pull_request.number, github.head_ref, github.base_ref) || format('"-Dsonar.branch.name={0}"', github.ref_name) }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      
+      # These SonarQube arguments are temporarily disabled:
+      # "-Dsonar.tests=tests"
+      # "-Dsonar.test.inclusions=tests/**/*.py"
+      # "-Dsonar.python.coverage.reportPaths=coverage.xml"
+      
+      # If you wish to fail your job when the Quality Gate is red, uncomment the
+      # following lines. This would typically be used to fail a deployment.
+      - uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+          

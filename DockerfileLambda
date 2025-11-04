@@ -1,0 +1,17 @@
+FROM public.ecr.aws/lambda/python:3.12
+ 
+WORKDIR ${LAMBDA_TASK_ROOT}
+ 
+# Install build tools
+RUN dnf install -y gcc gcc-c++ make && dnf clean all
+ 
+# Install uv
+RUN pip install --no-cache-dir uv
+ 
+# Copy all source code
+COPY . .
+ 
+# Install dependencies from pyproject.toml
+RUN uv pip install --system --no-cache-dir .
+ 
+CMD ["agents.coder.lambda_function.handler"]

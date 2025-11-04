@@ -1,0 +1,30 @@
+  
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: code-generator-a2a-server
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "1800"
+spec:
+  tls:
+    - hosts:
+        - code-generator-a2a.yashtechai.link
+      secretName: code-generator-a2a-tls-secret
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: code-generator-a2a.yashtechai.link
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: code-generator-a2a-server-service
+                port:
+                  number: 5000 

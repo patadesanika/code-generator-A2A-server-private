@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: code-generator-a2a-server-service
+spec:
+  selector:
+    app: code-generator-a2a-server
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: ClusterIP
+---

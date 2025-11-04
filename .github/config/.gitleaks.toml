@@ -1,0 +1,11 @@
+[[rules]]
+id = "generic-secret"               
+description = "Generic Secret"
+regex = '''(?i)(secret|token|key|password)[\s:=]+['"]?[a-z0-9]{8,}['"]?'''
+tags = ["key", "token", "secret"]
+
+[allowlist]
+description = "Ignore .env files"
+paths = [
+  '''\.env$'''
+]
