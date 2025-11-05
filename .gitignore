@@ -9,6 +9,8 @@ req.txt
 
 # Virtual environments
 .venv
+.venv/Lib/Scripts/
+.env/
 
 .env
 
